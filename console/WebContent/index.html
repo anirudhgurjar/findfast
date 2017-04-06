@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Log Scanner</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css"> 
+    <script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.3.16/angular.min.js"></script>
+        <script src="http://code.angularjs.org/1.2.16/angular-resource.js"></script>
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.11.0.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.8/angular-filter.min.js"></script>
+
+<style>
+  body{
+     background-color: #677077;      
+  }
+.jumbotron {
+    background-color: #252839; /* Orange */
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+.loginmodal-container {
+  padding: 30px;
+  width: 74% !important;
+  background-color: #F7F7F7;
+  margin: 0 auto;
+  border-radius: 2px;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.loginmodal-container h1 {
+  text-align: center;
+  font-size: 1.8em;
+  font-family: roboto;
+}
+
+.loginmodal-submit {
+  /* border: 1px solid #3079ed; */
+  border: 0px;
+  color: #fff;
+  text-shadow: 0 1px rgba(0,0,0,0.1); 
+  background-color: #4d90fe;
+  padding: 17px 0px;
+  font-family: roboto;
+  font-size: 14px;
+  /* background-image: -webkit-gradient(linear, 0 0, 0 100%,   from(#4d90fe), to(#4787ed)); */
+}
+
+
+.btn-primary {
+    background-color: #252839;
+    border-color: #8064A2;
+}
+
+</style>
+
+</head>
+
+<script language="javascript">
+  
+    var myApp = angular.module('myApp', ['ui.bootstrap','angular.filter']);
+   
+
+    myApp.controller('postController', function($scope, $http,$filter,$window) {
+      $scope.frm={};
+      $scope.subMnu={};
+      $scope.qkCmd={};
+      $scope.subSrvMnu={};
+      $scope.frm.pbuff=10;
+      $scope.frm.nbuff=50;
+
+  $scope.loadMainMnu=function(){
+                      var test= $filter('filter')($scope.mnu.opt, {'group': $scope.frm.group});                     
+                       $scope.subSrvMnu=test;
+                      $scope.frm.host={};                        
+   }
+
+
+  $scope.loadSub=function(){    
+                      var test= $filter('filter')($scope.mnu.opt, {'dispName': $scope.frm.host})[0];
+                    //   alert(JSON.stringify(test.logPath));
+                       $scope.subMnu=test.logPath;
+                       $scope.qkCmd=test.quickCmd;
+
+   }
+
+
+$scope.objects = [
+    {id: 1, name: "1st"},  {id: 2, name: "2nd"},  {id: 3, name: "3rd"},
+    {id: 4, name: "4th"},  {id: 5, name: "5th"},  {id: 6, name: "6th"},
+    {id: 7, name: "7th"},  {id: 8, name: "8th"},  {id: 9, name: "9th"},
+    {id: 10, name: "10th"},{id: 11, name: "11th"},{id: 12, name: "12th"}
+  ]
+
+
+ 
+$scope.loader = {
+            loading: false,
+ };
+
+// Menu
+	    	$scope.mnu={};
+        $scope.getMenuOptions = function() {
+                                  $http({
+                                    method  : 'POST',
+                                    url     : 'http://localhost:8080/LogScanner/server/config',
+                                    data    : ($scope.frmData), //forms user object
+                                    headers : {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} 
+                                  })
+                                    .success(function(data) {
+                                      if (data.errors) {
+                                      alert('error');
+                                      
+                                      } else {
+                                    // alert('success');
+                                        $scope.mnu.opt=angular.fromJson(data);
+                                      //    alert(JSON.stringify($scope.mnu.opt));
+                                        }
+                                    });
+        };
+
+
+// End Menu
+
+// GetFile
+		$scope.fileView={};
+    $scope.fileState={};
+    
+
+        $scope.getFile = function(obj) {
+                             $scope.fileState={};
+                              $scope.vwreq={
+                                  "fromLine" :(obj.lineNo-parseInt($scope.frm.pbuff))  ,
+                                  "toLine" : parseInt(obj.lineNo)+parseInt($scope.frm.nbuff) ,
+                                  "fileName" : obj.fileName ,
+                                  "host" : $scope.frm.host,
+                              };
+
+                                    $scope.loader.loading = true ;
+                                    $http({
+                                      method  : 'POST',
+                                      url     : 'http://localhost:8080/LogScanner/service/vwlog',
+                                      data    : ($scope.vwreq), //forms user object
+                                      headers : {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} 
+                                    })
+                                      .success(function(data) {
+                                        if (data.errors) {
+                                                      alert('error');
+                                                      $scope.loader.loading = false ;
+                                        } else {
+                                      // alert('succ ess');
+                                                        $scope.loader.loading = false ;
+                                                        $scope.fileView=data;
+                                                          $scope.fileState.fileName=obj.fileName;
+                                                          $scope.fileState.fromln=(obj.lineNo-parseInt($scope.frm.pbuff));
+                                                          $scope.fileState.toln=parseInt(obj.lineNo)+parseInt($scope.frm.nbuff);
+                                                          $scope.fileState.host=$scope.frm.host;                                                  
+                                                        $('html,body').animate({
+                                                            scrollTop: $('.resultPane1').offset().top
+                                                          }, 1000);              
+                                          }
+                                      });
+        };
+
+
+// GetFile
+
+   
+  $scope.paginate = function(value) {
+                                      var begin, end, index;
+                                      begin = ($scope.currentPage - 1) * $scope.numPerPage;
+                                      end = begin + $scope.numPerPage;
+                                      index = $scope.objects.indexOf(value);
+                                      return (begin <= index && index < end);
+  };
+
+    
+      // create a blank object to handle form data.
+        $scope.srchFrm = {};
+        $scope.frmData={
+                q : "ClassNotFoundException",
+                host :"rsohp044",
+                path :"/app/icm/rgricm22/J2EEServer/config/CRM/logs/*.log"
+
+        };
+      // calling our submit function.
+        $scope.submitForm = function() {
+                                      if((typeof $scope.frm.host)!='string' ){            
+                                            alert('Please select server');
+                                              return;
+                                        }
+                                      if($scope.frm.q == undefined ){            
+                                            alert('Please enter keyword');
+                                            return;
+                                    }
+
+                                   $('html,body').animate({
+                                              scrollTop: $('.gridss').offset().top
+                                            }, 1000);
+
+
+                                    $scope.resetResults();
+                                     $scope.loader.loading = true ;
+
+                                    $http({
+                                      method  : 'POST',
+                                      url     : 'http://localhost:8080/LogScanner/service/find',
+                                      data    : ($scope.frm), //forms user object
+                                      headers : {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} 
+                                    })
+                                      .success(function(data) {
+                                         alert(data.status);
+                                                if (data.errors) {
+                                                alert('error');
+                                                $scope.loader.loading = false ;
+                                                } 
+                                                else {
+                                                 
+                                                  $scope.objects=data;
+                                                    $scope.totalItems = $scope.objects.length;
+                                                    $scope.currentPage = 1;
+                                                    $scope.numPerPage = 10;
+                                                    $scope.loader.loading = false ;
+                                                    $('html,body').animate({
+                                                      scrollTop: $('.gridss').offset().top
+                                                    }, 1000);
+                                          }
+                                      }).error(function(data) {
+                                              alert(error);
+
+                                      });
+        };
+
+// reset all results
+     $scope.resetResults=function(){
+                                  $scope.objects={};
+                                  $scope.fileView={};
+                                  $scope.fileState={};
+                                  $scope.fileView={};
+
+ }
+
+
+//
+
+//Settings
+$scope.showSettings=false;
+      $scope.toggleSettings=function(){
+                    if($scope.showSettings){
+                           $scope.showSettings=false
+                    }else {
+                           $scope.showSettings=true;
+                    }
+  }
+
+
+//End settings
+
+
+// Set q
+    $scope.setQ=function(){
+        //alert($scope.frm.qkCmd);
+        $scope.frm.q=$scope.frm.qkCmd;
+    }
+//End set Q
+
+
+//Execute command
+
+        $scope.execCmd = function() {
+      
+          if((typeof $scope.frm.host)!='string' ){            
+            alert('Please select server');
+            return;
+        }
+          if($scope.frm.q == undefined ){            
+            alert('Please enter command');
+            return;
+        }
+
+
+             $('html,body').animate({
+                  scrollTop: $('.gridss').offset().top
+                }, 1000);
+
+
+             $scope.resetResults();
+            $scope.fileState={};
+          $scope.vwreq={
+              "genCmd" :$scope.frm.q,
+              "host" : $scope.frm.host,
+          };
+           $scope.loader.loading = true ;
+        
+        $http({
+          method  : 'POST',
+          url     : 'http://localhost:8080/LogScanner/service/vwlog',
+          data    : ($scope.vwreq), //forms user object
+          headers : {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} 
+         })
+          .success(function(data) {            
+
+            if (!angular.isUndefined(data[0].Error)) {
+             alert('Execution Failed ' + data[0].Error);
+             $scope.loader.loading = false ;
+            } else {
+              //alert($('.resultPane1').offset().top);
+
+            $('html,body').animate({
+                  scrollTop: $('.resultPane1').offset().top
+                }, 1000);
+
+                //$(window).scrollTop($('.resultPane1').offset().top);
+       //   $(window).scrollTop(2000);
+               // $window.scrollTo(0, angular.element(document.getElementById('anch')).offsetTop);  
+            $scope.loader.loading = false ;
+               $scope.fileView=data;
+                 $scope.fileState.fileName=obj.fileName;
+                 $scope.fileState.fromln=(obj.lineNo-20);
+                 $scope.fileState.toln=parseInt(obj.lineNo)+50;
+                 $scope.fileState.host=$scope.frm.host;
+         //  alert(($scope.fileView[0].output));
+              
+              }
+          });
+        };
+
+    });
+</script>
+
+<body ng-app="myApp" ng-controller="postController">
+
+
+  <div class="jumbotron">
+    <h1 align="center">File Scanner</h1>
+    <p align="center">Scan files, made it easy</p>
+  </div>
+
+
+<div class="loginmodal-container" style="border:1px solid #cecece;">
+<h2 align="left">Enter details</h2><hr>
+<form id="frm" class="form-horizontal">
+    <div class="form-group" ng-init="getMenuOptions()">  
+       <div class="row">
+          <div class="col-sm-4">
+              <label for="sel1">Server Type:</label>
+              <select class="form-control" id="sel1" ng-model="frm.group" ng-change="loadMainMnu()" required>
+                <option ng-repeat="n in mnu.opt  | unique: 'group'" value="{{n.group}}">{{n.group}}</option>
+              </select>
+          </div>
+      </div>
+    </div>
+
+ <div class="form-group">
+   <div class="row">
+    <div class="col-sm-4">
+      <label for="sel1">Server Name:</label>
+      <select class="form-control" id="sel1" ng-model="frm.host" ng-change="loadSub()" required>
+        <option ng-repeat="m in subSrvMnu track by $index" value="{{m.dispName}}">{{m.dispName}}</option>
+      </select>
+    </div>
+   </div>
+ </div>
+
+ <div class="form-group">
+   <div class="row">
+    <div class="col-sm-6">   
+    <label for="sel1">Location:</label>
+    <select class="form-control" id="sel1" ng-model="frm.path">
+      <option ng-repeat="(key,data) in subMnu track by $index" value="{{key}}">{{data}}</option>
+    </select>
+    </div>
+   </div>
+ </div>
+
+    <div class="form-group">
+      <div class="row">
+        <div class="col-sm-8">
+          <label for="pwd">Keyword</label>
+          <input type="text" class="form-control" ng-model="frm.q" id="pwd" placeholder="Enter keyword" ng-required="true">
+        </div>
+      </div>
+    </div>
+ <!--
+    <div class="form-group">
+      <div class="row">
+        <div class="col-md-4">
+          <label for="pwd">Line buffer</label>
+          <input type="text" size="1"  ng-model="frm.pbuff" id="pwd" placeholder="Number of line to be buffered before and after keyword" ng-required="true">
+          <label for="pwd">to</label>
+          <input type="text" size="1"  ng-model="frm.nbuff" id="pwd" placeholder="Number of line to be buffered before and after keyword" ng-required="true">
+
+        </div>
+      </div>
+    </div>
+-->
+
+
+ <div class="form-group">
+   <div class="row">
+    <div class="col-sm-4">   
+    <label for="sel1">Quick Commands:</label>
+    <select class="form-control" id="sel1" ng-model="frm.qkCmd" ng-change="setQ()">
+      <option ng-repeat="(key,data) in qkCmd track by $index" value="{{data}}">{{key}}</option>
+    </select>
+    </div>
+   </div>
+ </div>
+
+    <div class="form-group">
+
+     <button type="button" class="btn btn-primary" ng-click="submitForm()">
+      <span class="glyphicon glyphicon-search"></span> Search
+    </button> OR
+    <button type="button" class="btn btn-primary" ng-click="execCmd()">
+      <span class="glyphicon glyphicon-play"></span> Execute Command
+    </button><br><br>
+     <button type="button" class="btn btn-primary" ng-click="toggleSettings()">
+      <span class="glyphicon glyphicon-wrench"></span> Line Buffers
+    </button>
+      </div>
+
+
+   <div class="form-group" ng-show="showSettings">
+   <div class="col-xs-1">
+          <label for="ex1">#Pv Ln</label>
+          <input class="form-control" id="ex1" type="text" ng-model="frm.pbuff">
+      </div>
+    <div class="col-xs-1">
+        <label for="ex2">#Nxt Ln</label>
+        <input class="form-control" id="ex2" type="text" ng-model="frm.nbuff">
+  </div>
+</div> 
+
+
+  </form>
+</div>
+<a class="gridss"/><br>
+
+<div class="modal-dialog modal-lg" ng-show="loader.loading"><div style="font-size:48px;color:red">Loading</div><i class="fa fa-spinner fa-spin"  style="font-size:48px;color:red"></i></div>
+
+
+
+<div class="container-fluid" id="resultPane" ng-show="totalItems>0" style="background-color: #FFFFFF;">
+      <div>
+        
+        <table class="table table-striped table-hover table-bordered">
+          <thead>
+            <tr>
+              <th>Seq#</th>
+              <th>Line#</th>
+              <th>trace</th>
+              <th>File</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="obj in objects | filter : paginate">
+              <td>{{obj.seq}}</td>
+              <td><a href="#" ng-click="getFile(obj)">{{obj.lineNo}}</a></td>
+              <td>{{obj.trace}}</td>
+              <td>{{obj.fileName}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination total-items="totalItems" ng-model="currentPage"
+          max-size="5" boundary-links="true"
+          items-per-page="numPerPage" class="pagination-sm">
+        </pagination>
+      </div> 
+    </div>
+
+<div>
+<div class="resultPane1" id="anch"/>
+  <div class="resultPane container-fluid" ng-show="fileView.length>0">
+  <kbd> Host : {{fileState.host}}<br>
+   file :{{fileState.fileName}}<br>
+   Line :{{fileState.fromln}} to {{fileState.toln}}<br></kbd>
+    <pre style="background-color: #424040; "><kbd>{{fileView[0].output}}</kbd></pre>
+</div>
+
+ </body>
+</html>
