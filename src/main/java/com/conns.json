@@ -1,0 +1,89 @@
+[
+  {
+  	"group"  : "CRM_DEV",
+	"dispName" : "CRM_DEV_RGRICM22",
+    "hostName": "rsohp044",
+    "userName": "rgricm22",
+    "password": "Unix111!",
+    	"logPath": {
+    		"server_log" : "/app/icm/rgricm22/J2EEServer/config/CRM/logs/*.log",
+    		"Clfy_log"   : "/app/icm/rgricm22/J2EEServer/config/CRM/clfylogs/*.log"
+    	},
+		"quickCmd": {
+    		"List_DIR" : "ls -ltr",
+    		"SERVER_STATUS"   : "/app/icm/rgricm22/J2EEServer/config/CRM/clfylogs/*.log"
+    	},
+    "port" : 22	
+  },
+  {
+  	"group"  : "CRM_DEV",
+	"dispName" : "CRM_DEV_CRMAMD1",
+    "hostName": "ehpvm078",
+    "userName": "crmamd1",
+    "password": "!",
+	"keyStore": "\\\\rsohp043\\amdocs\\PROD\\ssh_key.ppk",
+    "logPath": {
+    		"server_log" : "/rbtusers1/test/aimsys/crmamd1/J2EEServer/config/CRM/logs/weblogic_console*.log",
+    		"Clfy_log"   : "/rbtusers1/test/aimsys/crmamd1/J2EEServer/config/CRM/logs/clfylog_AdminServer_*.log"
+    	},
+	"quickCmd": {
+    		"List_DIR" : "ls -ltr",
+    		"SERVER_STATUS"   : "/rbtusers1/test/aimsys/crmamd1/J2EEServer/config/CRM/scripts/pingServer.sh"
+    	},
+    "port" : 22	
+  },
+  {
+	"group"  : "CRM_PRD_APP",
+  	"dispName" : "CRM_PRD1_EHPAP121",
+    "hostName": "ehpap121",
+    "userName": "jduraisa",
+    "password": "",
+    "keyStore": "\\\\rsohp043\\amdocs\\PROD\\ssh_key.ppk",
+    "logPath": {
+    		"server_log" : "/app/prdcrm1/J2EEServer/config/CRM/logs/clfylog_PRDCRM*.log",
+			"config"    : "/app/prdcrm1/J2EEServer/config/CRM/application/Server/configurator/*.conf"		
+    	},
+    "port" : 22	
+  },
+    {
+	"group"  : "CRM_PRD_CIH",
+  	"dispName" : "CRM_PRD1_EHPAP154",
+    "hostName": "ehpap154",
+    "userName": "jduraisa",
+    "password": "",
+    "keyStore": "\\\\rsohp043\\amdocs\\PROD\\ssh_key.ppk",
+    "logPath": {
+    		"server_log" : "/app/prdcih/J2EEServer/config/CRM/logs/clfylog_PRDCRMCIH1_MS0*.log"    		
+    	},
+	"quickCmd": {
+    		"Check RuleManager" : "ps -ef | grep 'rmworker'"    		
+    	},		
+    "port" : 22	
+  },
+      {
+	"group"  : "CRM_DEV",
+  	"dispName" : "CRM_DEV_AMD_019",
+    "hostName": "ehpap019",
+    "userName": "anirudhc",
+    "password": "Unix123",
+	"keyStore": "\\\\rsohp043\\amdocs\\PROD\\ssh_key.ppk",
+        "logPath": {
+    		"server_log" : "/app/prdcih/J2EEServer/config/CRM/logs/clfylog_PRDCRMCIH1_MS0*.log"    		
+    	},
+    "port" : 22	
+  },
+  {
+	"group"  : "CRM_DEV",
+  	"dispName" : "CRM_DEV_SFT6",
+    "hostName": "ehpap025",
+    "userName": "jdamedar",
+    "password": "",
+	"keyStore": "\\\\rsohp043\\amdocs\\PROD\\ssh_key.ppk",
+        "logPath": {
+    		"WebLogic_log" : "/rbtusers2/test/aimsys/crmsft6/J2EEServer/config/CRM/logs/weblogic*.log",  
+			"Application_log" : "/rbtusers2/test/aimsys/crmsft6/J2EEServer/config/CRM/logs/clfylog_AdminServer*.log"			
+    	},
+    "port" : 22	
+  }
+]
+
